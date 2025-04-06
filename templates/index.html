@@ -1,0 +1,692 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Trivia Night Controller</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600&display=swap" rel="stylesheet">
+    <style>
+        body {
+            font-family: 'Poppins', sans-serif;
+            margin: 0;
+            padding: 20px;
+            background: linear-gradient(135deg, #ece9e6 0%, #ffffff 100%);
+            color: #333;
+        }
+        .container {
+            max-width: 950px;
+            margin: 20px auto;
+            background: #fff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.08);
+        }
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        h2 {
+            text-align: center;
+            color: #34495e;
+            margin-bottom: 20px;
+            font-weight: 400;
+            border-bottom: 1px solid #ecf0f1;
+            padding-bottom: 10px;
+        }
+        .teams, .question-area, .controls, .add-team-section {
+            margin-bottom: 25px;
+            padding: 20px;
+            border: 1px solid #ecf0f1;
+            border-radius: 8px;
+            background-color: #fdfdfd;
+        }
+        .teams ul {
+            list-style: none;
+            padding: 0;
+        }
+        .teams li {
+            display: grid;
+            grid-template-columns: auto 1fr auto auto; /* Rank | Name | Score | Controls */
+            gap: 15px;
+            align-items: center;
+            padding: 12px 5px;
+            border-bottom: 1px solid #ecf0f1;
+            transition: background-color 0.2s ease;
+        }
+        .teams li:last-child {
+            border-bottom: none;
+        }
+        .teams li:hover {
+             background-color: #f9f9f9;
+        }
+        .team-rank {
+            font-weight: bold;
+            color: #7f8c8d;
+            text-align: right;
+            width: 30px; /* Give rank a fixed width */
+        }
+        .team-name {
+            font-weight: 600;
+            color: #2980b9;
+        }
+        .score {
+            font-size: 1.1em;
+            font-weight: 600;
+            color: #27ae60;
+        }
+        .score-controls {
+            display: flex; /* Use flex for buttons */
+            gap: 6px;
+        }
+        .score-controls button {
+             width: 50px; /* Give buttons a fixed width */
+             text-align: center;
+             padding: 6px 0; /* Adjust padding */
+        }
+        .points-input-section {
+             text-align: center;
+             margin-bottom: 5px; /* Reduced bottom margin */
+        }
+        .points-input-section label {
+            font-weight: 600;
+            margin-right: 10px;
+            color: #34495e;
+        }
+         #global-points {
+            width: 60px;
+            padding: 8px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            text-align: center;
+            font-size: 1em;
+            font-weight: 600;
+        }
+        /* Base Button Style */
+        button, .controls a {
+            padding: 8px 15px;
+            font-size: 0.95em;
+            cursor: pointer;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            text-decoration: none;
+            transition: all 0.3s ease;
+            font-weight: 400;
+            display: inline-block; /* Ensure buttons behave correctly */
+            line-height: normal; /* Reset line height */
+        }
+        button:hover, .controls a:hover {
+            opacity: 0.9;
+            transform: translateY(-1px);
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        /* Specific Button Colors */
+        .add-button { background-color: #2ecc71; }
+        .subtract-button { background-color: #e74c3c; }
+        .remove-button { background-color: #e74c3c; } /* Match subtract button color */
+        .action-button { background-color: #3498db; }
+        .reset-button { background-color: #e67e22; }
+        .add-team-section {
+            text-align: center;
+        }
+        .add-team-form-container {
+            display: flex; /* Use flexbox */
+            justify-content: center; /* Center items horizontally */
+            align-items: center; /* Center items vertically */
+            gap: 10px;
+            margin-bottom: 15px;
+        }
+        .add-team-form-container form {
+             margin: 0; /* Remove default form margin */
+        }
+        .add-team-form-container input[type="text"] {
+            padding: 10px;
+            border: 1px solid #bdc3c7;
+            border-radius: 4px;
+            min-width: 250px;
+            height: 38px; /* Match button height */
+            box-sizing: border-box; /* Include padding and border in height */
+        }
+        .add-team-form-container button {
+             height: 38px; /* Match input height */
+             box-sizing: border-box;
+             vertical-align: middle; /* Align vertically */
+        }
+        .add-team-button { /* Specific class for Add Team button */
+             background-color: #9b59b6; /* Purple for Add Team */
+        }
+         .reset-all-button {
+             background-color: #c0392b; /* Darker Red for Reset All */
+        }
+        .question-area p { margin: 12px 0; }
+        .question-number { font-size: 0.9em; color: #7f8c8d; text-align: right;}
+        .question-category { font-style: italic; color: #555; font-weight: 600; }
+        .question-text { font-size: 1.3em; font-weight: 600; margin-top: 15px; color: #2c3e50; line-height: 1.5; }
+        .answer-text {
+            font-size: 1.2em;
+            color: #27ae60;
+            font-weight: 600;
+            background-color: #eafaf1;
+            padding: 15px;
+            border-radius: 6px;
+            margin-top: 20px;
+            border: 1px solid #abe5c1;
+        }
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            padding-top: 25px;
+            border-top: 1px solid #ecf0f1;
+        }
+        .hidden { display: none; }
+        .host-note {
+            text-align: center;
+            font-size: 0.85em;
+            font-style: italic;
+            color: #7f8c8d;
+            margin-top: 0;
+            margin-bottom: 15px;
+        }
+        /* Timer Styles */
+        .timer-section {
+            padding: 15px;
+            background-color: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 6px;
+            text-align: center;
+            flex: 1;
+            min-width: 200px;
+            align-self: flex-start;
+        }
+        .timer-section label {
+            margin-right: 5px;
+            font-weight: bold;
+        }
+        .timer-section input[type="number"] {
+            width: 60px;
+            padding: 5px 8px;
+            margin-right: 10px;
+            border: 1px solid #ced4da;
+            border-radius: 4px;
+        }
+        #timer-display {
+            font-size: 2.8em; /* Increased size */
+            font-weight: bold;
+            color: #343a40;
+            display: block;
+            margin: 10px 0;
+            font-family: 'Courier New', Courier, monospace;
+        }
+        .timer-controls button {
+             margin: 0 4px; /* Slightly reduce space */
+             padding: 6px 10px; /* Reduced padding */
+             font-size: 0.85em; /* Reduced font size */
+             /* Default timer button style (can be overridden) */
+             background-color: #7f8c8d; 
+        }
+        /* Specific Timer Button Colors */
+        .timer-set-btn { background-color: #3498db; } /* Blue */
+        .timer-start-btn { background-color: #2ecc71; } /* Green */
+        .timer-pause-btn { background-color: #e67e22; } /* Orange */
+        .timer-reset-btn { background-color: #6c757d; } /* Darker Grey */
+
+        .auto-start-label {
+            display: inline-block; /* Keep label and checkbox together */
+            margin-top: 10px;
+            font-size: 0.9em;
+            color: #555;
+            cursor: pointer;
+        }
+        .auto-start-label input {
+             margin-right: 5px;
+             vertical-align: middle; /* Align checkbox nicely */
+             cursor: pointer;
+        }
+        /* Wrapper for Question Content and Timer */
+        .question-details-wrapper {
+            display: flex;
+            gap: 20px;
+            align-items: flex-start;
+        }
+        .question-content {
+            flex: 3;
+        }
+        /* Modal Styles Start */
+        .modal-overlay {
+            display: none; /* Hidden by default */
+            position: fixed; /* Stay in place */
+            z-index: 1000; /* Sit on top */
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto; /* Enable scroll if needed */
+            background-color: rgba(0,0,0,0.5); /* Black w/ opacity */
+            /* Use flexbox to center the modal content - applied by JS when shown */
+            justify-content: center;
+            align-items: center;
+        }
+        .modal-content {
+            background-color: #fefefe;
+            /* Remove margin: auto; flexbox handles centering */
+            padding: 25px 30px;
+            border: 1px solid #ccc;
+            width: 90%;
+            max-width: 400px;
+            border-radius: 8px;
+            box-shadow: 0 4px 8px 0 rgba(0,0,0,0.2),0 6px 20px 0 rgba(0,0,0,0.19);
+            text-align: center;
+            position: relative; /* For close button positioning */
+        }
+        .modal-emoji {
+            font-size: 3.5em; /* Large emoji */
+            display: block;
+            margin-bottom: 15px;
+        }
+        .modal-text {
+             font-size: 1.3em;
+             font-weight: 600;
+             color: #333;
+             margin-bottom: 20px;
+        }
+        .close-button {
+            color: #aaa;
+            position: absolute;
+            top: 10px;
+            right: 15px;
+            font-size: 28px;
+            font-weight: bold;
+            line-height: 1;
+        }
+        .close-button:hover,
+        .close-button:focus {
+            color: black;
+            text-decoration: none;
+            cursor: pointer;
+        }
+        /* Modal Styles End */
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Trivia Night Controller</h1>
+
+        <!-- Question/Answer Area -->
+        <div class="question-area">
+            <h2>Current Question</h2>
+            <div class="question-details-wrapper">
+                <div class="question-content">
+                    {% if game_state.state != 'lobby' %}
+                        <p class="question-number">Question {{ game_state.current_question_index + 1 }} of {{ game_state.questions|length }}</p>
+                        <p class="question-category">Category: {{ game_state.current_category }}</p>
+                        <p class="question-text">{{ game_state.current_question }}</p>
+                        {% if game_state.state == 'answer_revealed' %}
+                            <p class="answer-text">Answer: {{ game_state.current_answer }}</p>
+                        {% endif %}
+                    {% else %}
+                        <p style="text-align: center; color: #7f8c8d;">{{ game_state.current_question if game_state.current_question else 'Waiting to start...' }}</p>
+                    {% endif %}
+                </div>
+
+                <!-- Timer Section -->
+                <div class="timer-section">
+                    <div>
+                        <label for="timer-duration">Set Timer (sec):</label>
+                        <input type="number" id="timer-duration" value="60" min="10" max="300">
+                        <button onclick="setTimerDuration()" class="timer-set-btn">Set</button>
+                    </div>
+                    <span id="timer-display">01:00</span>
+                    <div class="timer-controls">
+                        <button id="start-timer-btn" onclick="startTimer()" class="timer-start-btn">Start</button>
+                        <button id="pause-timer-btn" onclick="pauseTimer()" class="timer-pause-btn" disabled>Pause</button>
+                        <button id="reset-timer-btn" onclick="resetTimer()" class="timer-reset-btn">Reset</button>
+                    </div>
+                     <!-- Auto-start Toggle -->
+                    <label class="auto-start-label">
+                        <input type="checkbox" id="auto-start-timer">
+                        Auto-start timer on new question
+                    </label>
+                </div>
+            </div>
+        </div>
+        <!-- End Question Area -->
+
+        <!-- Controls -->
+        <div class="controls">
+            {% if game_state.state == 'lobby' %}
+                <a href="{{ url_for('start_game') }}" class="action-button">Start Game / Next Question</a>
+            {% elif game_state.state == 'question_displayed' %}
+                <a href="{{ url_for('reveal_answer') }}" class="action-button">Reveal Answer</a>
+                <a href="{{ url_for('next_question') }}" class="action-button" onclick="return confirm('Skip this question?');">Skip Question</a>
+            {% elif game_state.state == 'answer_revealed' %}
+                <a href="{{ url_for('next_question') }}" class="action-button">Next Question</a>
+            {% endif %}
+
+            <a href="{{ url_for('reset_game') }}" class="reset-button" onclick="return confirm('Are you sure you want to reset the game? This will reset questions and scores, but keep teams.');">Reset Game (Keep Teams)</a>
+       </div>
+
+        <!-- Teams Display -->
+        <div class="teams">
+            <h2>Teams & Scores</h2>
+            <!-- Single Points Input -->
+            <div class="points-input-section">
+                <label for="global-points">Points to Add/Subtract:</label>
+                <input type="number" id="global-points" value="1" min="-20" max="20">
+            </div>
+            <p class="host-note">Game host determines points awarded/subtracted per question.</p>
+
+            {% if sorted_teams %}
+                <ul>
+                    {# Iterate over the sorted_teams list passed from Flask #}
+                    {% for team_name, score in sorted_teams %}
+                        <li data-team-name="{{ team_name }}">
+                            <span class="team-rank">{{ loop.index }}.</span>
+                            <span class="team-name">{{ team_name }}</span>
+                            <span class="score">Score: <span class="score-value">{{ score }}</span></span>
+                            <span class="score-controls">
+                                <button class="add-button" onclick="updateScore('{{ team_name }}', true)">Add</button>
+                                <button class="subtract-button" onclick="updateScore('{{ team_name }}', false)">Sub</button>
+                                <!-- Add Remove Button Form Here -->
+                                <form action="{{ url_for('remove_team') }}" method="POST" style="display: inline; margin-left: 5px;">
+                                    <input type="hidden" name="team_name" value="{{ team_name }}">
+                                    <button type="submit" class="remove-button" title="Remove {{ team_name }}" onclick="return confirm('Are you sure you want to remove team {{ team_name }}?')">×</button>
+                                </form>
+                            </span>
+                        </li>
+                    {% endfor %}
+                </ul>
+            {% else %}
+                <p style="text-align: center; color: #7f8c8d;">No teams added yet.</p>
+            {% endif %}
+        </div>
+
+        <!-- Add Team Section (Moved to Bottom) -->
+        <div class="add-team-section">
+             <h2>Manage Teams</h2>
+            <div class="add-team-form-container">
+                <form action="{{ url_for('add_team') }}" method="post">
+                    <input type="text" name="team_name" placeholder="Enter New Team Name" required>
+                    <button type="submit" class="add-team-button">Add Team</button>
+                </form>
+                <form action="{{ url_for('reset_teams') }}" method="get" onsubmit="return confirm('Are you sure you want to remove ALL teams and reset scores?');">
+                     <button type="submit" class="reset-all-button">Reset All Teams</button>
+                </form>
+            </div>
+        </div>
+
+    </div>
+
+    <!-- Buzzer Sound -->
+    <audio id="buzzer-sound" src="{{ url_for('static', filename='buzzer.ogg') }}" preload="auto"></audio>
+
+    <!-- Time's Up Modal -->
+    <div id="timesUpModal" class="modal-overlay">
+        <div class="modal-content">
+            <span class="close-button" onclick="closeTimesUpModal()">&times;</span>
+            <span class="modal-emoji">⏰</span>
+            <p class="modal-text">Time's Up!</p>
+        </div>
+    </div>
+
+    <script>
+        async function updateScore(teamName, isAdding) {
+            const pointsInput = document.getElementById('global-points');
+            const points = parseInt(pointsInput.value) || 0;
+            const pointsToUpdate = isAdding ? points : -points;
+
+            try {
+                const response = await fetch("{{ url_for('update_score') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        team_name: teamName, 
+                        points: pointsToUpdate 
+                    }),
+                });
+
+                if (!response.ok) {
+                    console.error("Server error:", response.statusText);
+                    alert("Error updating score. Check console.");
+                    return;
+                }
+
+                const result = await response.json();
+
+                if (result.success) {
+                    // Update the specific team's score element
+                    const teamRow = document.querySelector(`li[data-team-name="${teamName}"]`);
+                    if (teamRow) {
+                        const scoreElement = teamRow.querySelector('.score-value');
+                        if (scoreElement) {
+                            scoreElement.textContent = result.new_score;
+                        }
+                    }
+
+                    // --- Add Live Sorting Logic --- 
+                    const teamsList = document.querySelector('.teams ul');
+                    if (teamsList) {
+                        const teamItems = Array.from(teamsList.querySelectorAll('li'));
+
+                        teamItems.sort((a, b) => {
+                            const scoreA = parseInt(a.querySelector('.score-value').textContent || '0');
+                            const scoreB = parseInt(b.querySelector('.score-value').textContent || '0');
+                            return scoreB - scoreA; // Sort descending
+                        });
+
+                        // Clear current list
+                        teamsList.innerHTML = ''; 
+
+                        // Append sorted items and update rank
+                        teamItems.forEach((item, index) => {
+                            const rankElement = item.querySelector('.team-rank');
+                            if (rankElement) {
+                                rankElement.textContent = `${index + 1}.`;
+                            }
+                            teamsList.appendChild(item);
+                        });
+                    }
+                    // --- End Live Sorting Logic ---
+
+                } else {
+                    console.error("Failed to update score:", result.message);
+                    alert("Failed to update score: " + result.message);
+                }
+            } catch (error) {
+                console.error("Fetch error:", error);
+                alert("Network error updating score. Check console.");
+            }
+        }
+
+        // --- Timer Logic --- 
+        let timerInterval = null;
+        let totalSeconds = 60; // Default timer duration
+        let secondsRemaining = totalSeconds;
+        let isPaused = false;
+        let timesUpModal = null; // Declare variable, assign later
+        let buzzerSound = null; // Declare variable for audio element
+
+        // Load initial duration from localStorage or use default
+        function loadInitialDuration() {
+            const savedDuration = localStorage.getItem('timerDuration');
+            if (savedDuration && !isNaN(parseInt(savedDuration))) {
+                totalSeconds = parseInt(savedDuration);
+                if (totalSeconds < 10 || totalSeconds > 300) {
+                    totalSeconds = 60; // Revert to default if saved value is out of bounds
+                    localStorage.setItem('timerDuration', totalSeconds); // Save corrected default
+                }
+            } else {
+                totalSeconds = 60; // Default if nothing saved or invalid
+                 localStorage.setItem('timerDuration', totalSeconds); // Save default on first load
+            }
+            durationInput.value = totalSeconds; // Update input field
+            secondsRemaining = totalSeconds; // Set initial remaining time
+        }
+
+        const timerDisplay = document.getElementById('timer-display');
+        const durationInput = document.getElementById('timer-duration');
+        const startBtn = document.getElementById('start-timer-btn');
+        const pauseBtn = document.getElementById('pause-timer-btn');
+        const resetBtn = document.getElementById('reset-timer-btn');
+        const autoStartCheckbox = document.getElementById('auto-start-timer');
+
+        // --- Modal Functions ---
+        function openTimesUpModal() {
+            console.log("Attempting to open modal. Element:", timesUpModal); // Debug log
+            if (timesUpModal) {
+                timesUpModal.style.display = 'flex'; // Show modal using flex
+                // Play buzzer sound
+                if (buzzerSound) {
+                    buzzerSound.currentTime = 0; // Rewind to start in case it was played recently
+                    buzzerSound.play().catch(error => console.error("Error playing sound:", error)); // Play and catch potential errors
+                } else {
+                     console.warn("Buzzer sound element not found!");
+                }
+            } else {
+                 console.error("Modal element 'timesUpModal' not found!");
+            }
+        }
+
+        function closeTimesUpModal() {
+            if (timesUpModal) {
+                timesUpModal.style.display = 'none'; // Hide modal
+            }
+        }
+
+        // Close modal if user clicks outside the content area
+        window.onclick = function(event) {
+            if (event.target == timesUpModal) {
+                closeTimesUpModal();
+            }
+        }
+
+        // --- End Modal Functions ---
+
+        // Load auto-start preference from localStorage
+        function loadAutoStartPreference() {
+            const savedPref = localStorage.getItem('timerAutoStart');
+            // If preference exists, set checkbox accordingly. Default to false if not set.
+            autoStartCheckbox.checked = savedPref === 'true'; 
+        }
+
+        // Save auto-start preference to localStorage
+        function saveAutoStartPreference() {
+            localStorage.setItem('timerAutoStart', autoStartCheckbox.checked);
+        }
+
+        // Attach event listener to checkbox
+        autoStartCheckbox.addEventListener('change', saveAutoStartPreference);
+
+        function formatTime(seconds) {
+            const mins = Math.floor(seconds / 60);
+            const secs = seconds % 60;
+            return `${mins.toString().padStart(2, '0')}:${secs.toString().padStart(2, '0')}`;
+        }
+
+        function updateDisplay() {
+            timerDisplay.textContent = formatTime(secondsRemaining);
+        }
+
+        function setTimerDuration() {
+            const newDuration = parseInt(durationInput.value);
+            if (!isNaN(newDuration) && newDuration >= 10 && newDuration <= 300) {
+                totalSeconds = newDuration;
+                localStorage.setItem('timerDuration', totalSeconds); // Save new duration
+                resetTimer(); // Reset timer with new duration
+            } else {
+                alert('Please enter a duration between 10 and 300 seconds.');
+                durationInput.value = totalSeconds; // Revert input if invalid
+            }
+        }
+
+        function startTimer() {
+            if (timerInterval) return; // Already running
+            isPaused = false;
+            startBtn.disabled = true;
+            pauseBtn.disabled = false;
+            durationInput.disabled = true; // Disable changing duration while running
+
+            timerInterval = setInterval(() => {
+                if (isPaused) return;
+                
+                secondsRemaining--;
+                updateDisplay();
+
+                if (secondsRemaining <= 0) {
+                    console.log("Timer ended. Calling openTimesUpModal..."); // Debug log
+                    clearInterval(timerInterval);
+                    timerInterval = null;
+                    openTimesUpModal(); // Show the modal instead
+                    pauseBtn.disabled = true;
+                    startBtn.disabled = false; 
+                    durationInput.disabled = false;
+                }
+            }, 1000);
+            console.log("Timer started.");
+        }
+
+        function pauseTimer() {
+            isPaused = !isPaused;
+            pauseBtn.textContent = isPaused ? 'Resume' : 'Pause';
+        }
+
+        function resetTimer(triggerAutoStart = false) { 
+            clearInterval(timerInterval);
+            timerInterval = null;
+            isPaused = false;
+            // Make sure totalSeconds is up-to-date before resetting remaining time
+            // (though setTimerDuration should have updated it already)
+            const currentSetDuration = parseInt(durationInput.value) || totalSeconds;
+            if (currentSetDuration >= 10 && currentSetDuration <= 300){
+                 totalSeconds = currentSetDuration; // Update global if input changed without hitting Set
+            }
+            secondsRemaining = totalSeconds; // Reset to the current total duration
+            updateDisplay();
+            startBtn.disabled = false;
+            pauseBtn.disabled = true;
+            pauseBtn.textContent = 'Pause';
+            durationInput.disabled = false;
+            console.log("Timer reset.");
+
+            // Conditionally start the timer if auto-start is requested and enabled
+            if (triggerAutoStart && autoStartCheckbox.checked) {
+                console.log("Auto-starting timer...");
+                startTimer();
+            }
+        }
+
+        // Initialize display and preferences on page load
+        document.addEventListener('DOMContentLoaded', () => {
+            // Assign element references AFTER DOM is loaded
+            timesUpModal = document.getElementById('timesUpModal'); 
+            buzzerSound = document.getElementById('buzzer-sound'); // Get audio element
+            
+            if (!timesUpModal) {
+                 console.error("CRITICAL: Modal element #timesUpModal not found after DOM load!");
+            }
+            if (!buzzerSound) {
+                 console.error("CRITICAL: Audio element #buzzer-sound not found after DOM load!");
+            }
+
+            loadInitialDuration(); // Load duration and set input/display
+            updateDisplay(); 
+            loadAutoStartPreference(); // Load the saved checkbox state
+
+            // Auto-reset and potentially auto-start timer when page loads if question displayed
+            if ("{{ game_state.state }}" === 'question_displayed') {
+                console.log("Question displayed on load, resetting timer (auto-start check follows).");
+                resetTimer(true); // Pass true to check for auto-start
+            }
+        });
+
+    </script>
+
+</body>
+</html> 
