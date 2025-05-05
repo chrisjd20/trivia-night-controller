@@ -1,4 +1,4 @@
-fetch("/bunkermarket/transfer", {
+fetch("/radrovers/transfer", {
   method: "POST",
   credentials: "include",
   headers: { "Content-Type": "application/x-www-form-urlencoded" },
