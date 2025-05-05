@@ -1,4 +1,4 @@
-fetch("http://localhost/bunkermarket/transfer", {
+fetch("/bunkermarket/transfer", {
   method: "POST",
   credentials: "include",
   headers: { "Content-Type": "application/x-www-form-urlencoded" },
